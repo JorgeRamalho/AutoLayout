@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Auto Layout Lab — aprenda Figma Auto Layout vendo o equivalente em CSS flexbox em tempo real." />
+  <title>Auto Layout Lab — Figma no navegador</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --text: #0f0f12;
+      --text-muted: #5c5c66;
+      --accent: #7c3aed;
+      --accent-hover: #6d28d9;
+      --accent-soft: #ede9fe;
+      --border: #e4e4e7;
+      --shadow-sm: 0 1px 3px rgb(0 0 0 / 6%);
+      --shadow-md: 0 8px 24px rgb(0 0 0 / 8%);
+      --font-sans: "DM Sans", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0c0c0f;
+      --surface: #16161a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --accent: #a78bfa;
+      --accent-hover: #8b5cf6;
+      --accent-soft: #2e1065;
+      --border: #27272a;
+      --shadow-sm: 0 1px 3px rgb(0 0 0 / 30%);
+      --shadow-md: 0 8px 24px rgb(0 0 0 / 40%);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .frame { display: flex; box-sizing: border-box; }
+    .frame--col { flex-direction: column; }
+    .frame--row { flex-direction: row; }
+    .frame--wrap { flex-wrap: wrap; }
+    .frame--gap-2 { gap: var(--space-2); }
+    .frame--gap-3 { gap: var(--space-3); }
+    .frame--gap-4 { gap: var(--space-4); }
+    .frame--gap-6 { gap: var(--space-6); }
+    .frame--gap-8 { gap: var(--space-8); }
+    .frame--gap-12 { gap: var(--space-12); }
+    .frame--pad-3 { padding: var(--space-3); }
+    .frame--pad-4 { padding: var(--space-4); }
+    .frame--pad-x-4 { padding-inline: var(--space-4); }
+    .frame--between { justify-content: space-between; }
+    .frame--align-center { align-items: center; }
+
+    .page { min-height: 100vh; }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: color-mix(in srgb, var(--surface) 85%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header__inner { max-width: 1200px; margin: 0 auto; width: 100%; }
+    .logo { font-weight: 700; font-size: 1.125rem; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    .nav-link {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.15s ease;
+    }
+    .nav-link:hover { color: var(--text); }
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      padding-block: var(--space-12);
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: var(--space-1) var(--space-3);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      width: fit-content;
+    }
+    .hero__title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+    .hero__lead { font-size: 1.125rem; color: var(--text-muted); max-width: 52ch; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-3) var(--space-6);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn--primary { background: var(--accent); color: #fff; }
+    .btn--primary:hover { background: var(--accent-hover); }
+    .btn--ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hero-preview {
+      flex: 1;
+      min-width: 280px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+    .figma-bar {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .figma-bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+    .figma-bar span:first-child { background: #ff5f57; }
+    .figma-bar span:nth-child(2) { background: #febc2e; }
+    .figma-bar span:nth-child(3) { background: #28c840; }
+    .demo-box {
+      margin: var(--space-4);
+      border: 2px dashed var(--accent);
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--accent-soft) 50%, transparent);
+      min-height: 120px;
+    }
+    .chip {
+      padding: var(--space-2) var(--space-4);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      width: fit-content;
+    }
+    .chip--fill { flex: 1; text-align: center; }
+
+    .section-title { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
+    .section-subtitle { color: var(--text-muted); max-width: 60ch; }
+
+    .card {
+      flex: 1 1 280px;
+      padding: var(--space-6);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); }
+    .card__icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: var(--radius-sm);
+      font-size: 1.25rem;
+      margin-bottom: var(--space-4);
+    }
+    .card__title { font-size: 1.0625rem; font-weight: 600; margin-bottom: var(--space-2); }
+    .card__desc { font-size: 0.9375rem; color: var(--text-muted); }
+    .card__tag {
+      margin-top: var(--space-4);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      width: fit-content;
+    }
+
+    .controls {
+      flex: 0 0 280px;
+      padding: var(--space-6);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+    .control-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-2);
+    }
+    .control-group select,
+    .control-group input[type="range"] {
+      width: 100%;
+      padding: var(--space-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+    }
+    .preview-panel { flex: 1; min-width: 0; }
+    .preview {
+      min-height: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+    }
+    .block {
+      min-width: 64px;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-family: var(--font-mono);
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+    .code-output {
+      padding: var(--space-4);
+      background: #1e1e2e;
+      color: #cdd6f4;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.7;
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+    th, td { padding: var(--space-4); text-align: left; border-bottom: 1px solid var(--border); }
+    th { font-weight: 600; background: var(--bg); }
+    tr:last-child td { border-bottom: none; }
+    td code {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .footer { border-top: 1px solid var(--border); margin-top: var(--space-16); }
+    .footer__inner { max-width: 1200px; margin: 0 auto; width: 100%; }
+    .footer__text { font-size: 0.875rem; color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      .hero { flex-direction: column; }
+      .playground__grid { flex-direction: column; }
+      .controls { flex: 1 1 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page frame frame--col">
+
+    <header class="header frame frame--row frame--pad-4">
+      <div class="header__inner frame frame--row frame--between frame--align-center">
+        <a class="logo" href="#">Auto <span>Layout</span> Lab</a>
+        <nav class="header__nav frame frame--row frame--gap-4 frame--align-center" aria-label="Principal">
+          <a class="nav-link" href="#features">Conceitos</a>
+          <a class="nav-link" href="#playground">Playground</a>
+          <a class="nav-link" href="#mapa">Mapa Figma → CSS</a>
+          <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Alternar tema">◐</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main frame frame--col frame--gap-12 frame--pad-x-4">
+
+      <section class="hero frame frame--row frame--gap-8 frame--align-center">
+        <div class="frame frame--col frame--gap-4" style="flex: 1">
+          <span class="badge">Design system · Flexbox</span>
+          <h1 class="hero__title">Auto Layout do Figma,<br />vivo no seu navegador</h1>
+          <p class="hero__lead">
+            Ajuste direction, gap, padding e alignment — e veja o equivalente em CSS em tempo real.
+          </p>
+          <div class="frame frame--row frame--gap-3 frame--wrap">
+            <a class="btn btn--primary" href="#playground">Abrir playground</a>
+            <a class="btn btn--ghost" href="#mapa">Ver mapa completo</a>
+          </div>
+        </div>
+        <aside class="hero-preview frame frame--col" aria-hidden="true">
+          <div class="figma-bar"><span></span><span></span><span></span></div>
+          <div class="demo-box frame frame--row frame--gap-2 frame--pad-3 frame--align-center">
+            <div class="chip">HUG</div>
+            <div class="chip chip--fill">FILL</div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="features" class="frame frame--col frame--gap-6">
+        <div class="frame frame--col frame--gap-2">
+          <h2 class="section-title">Propriedades que você usa todo dia</h2>
+          <p class="section-subtitle">Cada card representa um controle do painel Auto Layout do Figma.</p>
+        </div>
+        <div class="frame frame--row frame--wrap frame--gap-4">
+          <article class="card frame frame--col">
+            <div class="card__icon">↔</div>
+            <h3 class="card__title">Direction</h3>
+            <p class="card__desc">Horizontal ou vertical define o eixo principal — row ou column no CSS.</p>
+            <span class="card__tag">flex-direction</span>
+          </article>
+          <article class="card frame frame--col">
+            <div class="card__icon">⊞</div>
+            <h3 class="card__title">Gap</h3>
+            <p class="card__desc">Espaçamento uniforme entre filhos, sem margin manual.</p>
+            <span class="card__tag">gap</span>
+          </article>
+          <article class="card frame frame--col">
+            <div class="card__icon">⬚</div>
+            <h3 class="card__title">Padding</h3>
+            <p class="card__desc">Respiro interno do frame — padding no container.</p>
+            <span class="card__tag">padding</span>
+          </article>
+          <article class="card frame frame--col">
+            <div class="card__icon">≡</div>
+            <h3 class="card__title">Alignment</h3>
+            <p class="card__desc">Primary axis → justify-content. Counter axis → align-items.</p>
+            <span class="card__tag">justify / align</span>
+          </article>
+          <article class="card frame frame--col">
+            <div class="card__icon">◧</div>
+            <h3 class="card__title">Sizing</h3>
+            <p class="card__desc">HUG abraça o conteúdo. FILL ocupa o espaço disponível.</p>
+            <span class="card__tag">fit-content / flex: 1</span>
+          </article>
+          <article class="card frame frame--col">
+            <div class="card__icon">↩</div>
+            <h3 class="card__title">Wrap</h3>
+            <p class="card__desc">Filhos quebram para a próxima linha quando não cabem.</p>
+            <span class="card__tag">flex-wrap: wrap</span>
+          </article>
+        </div>
+      </section>
+
+      <section id="playground" class="frame frame--col frame--gap-6">
+        <div class="frame frame--col frame--gap-2">
+          <h2 class="section-title">Playground</h2>
+          <p class="section-subtitle">Mude os controles e observe o preview e o CSS gerado.</p>
+        </div>
+        <div class="playground__grid frame frame--row frame--gap-6">
+          <aside class="controls frame frame--col frame--gap-4">
+            <div class="control-group">
+              <label for="direction">Direction</label>
+              <select id="direction">
+                <option value="row">Horizontal (row)</option>
+                <option value="column">Vertical (column)</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="gap">Gap — <span id="gap-value">16</span>px</label>
+              <input type="range" id="gap" min="0" max="48" value="16" step="4" />
+            </div>
+            <div class="control-group">
+              <label for="padding">Padding — <span id="padding-value">16</span>px</label>
+              <input type="range" id="padding" min="0" max="48" value="16" step="4" />
+            </div>
+            <div class="control-group">
+              <label for="justify">Primary axis (justify)</label>
+              <select id="justify">
+                <option value="flex-start">Start</option>
+                <option value="center">Center</option>
+                <option value="flex-end">End</option>
+                <option value="space-between">Space between</option>
+                <option value="space-around">Space around</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="align">Counter axis (align)</label>
+              <select id="align">
+                <option value="stretch">Stretch</option>
+                <option value="flex-start">Start</option>
+                <option value="center">Center</option>
+                <option value="flex-end">End</option>
+              </select>
+            </div>
+          </aside>
+          <div class="preview-panel">
+            <div id="preview" class="preview frame frame--row frame--gap-4 frame--pad-4">
+              <div class="block">A</div>
+              <div class="block">B</div>
+              <div class="block">C</div>
+            </div>
+            <pre id="css-output" class="code-output" aria-live="polite">display: flex;
+flex-direction: row;
+gap: 16px;
+padding: 16px;
+justify-content: flex-start;
+align-items: stretch;</pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="mapa" class="frame frame--col frame--gap-6">
+        <div class="frame frame--col frame--gap-2">
+          <h2 class="section-title">Mapa Figma → CSS</h2>
+          <p class="section-subtitle">Referência rápida para traduzir Auto Layout em código.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Figma (Auto Layout)</th>
+                <th scope="col">CSS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Direction → Horizontal</td><td><code>flex-direction: row</code></td></tr>
+              <tr><td>Direction → Vertical</td><td><code>flex-direction: column</code></td></tr>
+              <tr><td>Gap</td><td><code>gap: Npx</code></td></tr>
+              <tr><td>Padding</td><td><code>padding: Npx</code></td></tr>
+              <tr><td>Primary axis alignment</td><td><code>justify-content</code></td></tr>
+              <tr><td>Counter axis alignment</td><td><code>align-items</code></td></tr>
+              <tr><td>HUG contents</td><td><code>width: fit-content</code></td></tr>
+              <tr><td>FILL container</td><td><code>flex: 1</code></td></tr>
+              <tr><td>Wrap</td><td><code>flex-wrap: wrap</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer frame frame--pad-4">
+      <div class="footer__inner frame frame--row frame--between frame--align-center frame--wrap frame--gap-4">
+        <p class="footer__text">Auto Layout Lab — Projeto educativo Figma × CSS</p>
+        <p class="footer__text">Feito com flexbox e tokens de design</p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const preview = document.getElementById("preview");
+    const output = document.getElementById("css-output");
+    const direction = document.getElementById("direction");
+    const gap = document.getElementById("gap");
+    const padding = document.getElementById("padding");
+    const justify = document.getElementById("justify");
+    const align = document.getElementById("align");
+    const gapValue = document.getElementById("gap-value");
+    const paddingValue = document.getElementById("padding-value");
+    const themeToggle = document.getElementById("theme-toggle");
+
+    function applyLayout() {
+      const g = gap.value;
+      const p = padding.value;
+      preview.style.flexDirection = direction.value;
+      preview.style.gap = g + "px";
+      preview.style.padding = p + "px";
+      preview.style.justifyContent = justify.value;
+      preview.style.alignItems = align.value;
+      gapValue.textContent = g;
+      paddingValue.textContent = p;
+      output.textContent =
+        "display: flex;\nflex-direction: " + direction.value + ";\n" +
+        "gap: " + g + "px;\npadding: " + p + "px;\n" +
+        "justify-content: " + justify.value + ";\nalign-items: " + align.value + ";";
+    }
+
+    [direction, gap, padding, justify, align].forEach(function (el) {
+      el.addEventListener("input", applyLayout);
+      el.addEventListener("change", applyLayout);
+    });
+
+    themeToggle.addEventListener("click", function () {
+      const html = document.documentElement;
+      html.setAttribute("data-theme", html.getAttribute("data-theme") === "dark" ? "light" : "dark");
+    });
+  </script>
+</body>
+</html>
