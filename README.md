@@ -2,7 +2,7 @@
 
 🌐 ## Website Link do projeto online: https://autolayout.netlify.app/
 
-📂 ## Repositório: https://github.com//JorgeRamalho/autolayout
+📂 ## Repositório: https://github.com//JorgeRamalho/AutoLayout.git
 
 💻 ## Tecnologias
 
